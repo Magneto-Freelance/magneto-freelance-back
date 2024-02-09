@@ -1,12 +1,12 @@
-from fastapi import FastAPI, Body, HTTPException, status
-import motor.motor_asyncio
 import os
-from pydantic import BaseModel
-from pydantic import ConfigDict, BaseModel, Field, EmailStr
-from typing_extensions import Annotated
-from pydantic.functional_validators import BeforeValidator
-from typing import Optional, List
+from typing import List, Optional
 
+import motor.motor_asyncio
+from fastapi import Body, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic.functional_validators import BeforeValidator
+from typing_extensions import Annotated
 
 # creación de base de datos
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
@@ -52,6 +52,15 @@ class Company(BaseModel):
 
 # crear la ruta fastApi
 app = FastAPI(title="Magneto-freelance-back")
+
+# Esta middleware es para que el front se pueda conectar al back, es para darle "permiso"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #definicion de la ruta para hacer el create
 @app.post(
