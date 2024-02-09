@@ -1,6 +1,5 @@
 import os
 from typing import List, Optional
-
 import motor.motor_asyncio
 from fastapi import Body, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
