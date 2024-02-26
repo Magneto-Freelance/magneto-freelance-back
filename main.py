@@ -40,7 +40,7 @@ class Company(BaseModel):
     description: str = Field(...)
     ubication: str = Field(...)
     type: str = Field(...)
-    id: str = Field(...)
+    nit: str = Field(...)
     cellphoneNumber: str = Field(...)
     model_config = ConfigDict(
         populate_by_name=True,
