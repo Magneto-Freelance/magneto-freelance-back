@@ -13,6 +13,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
 db = client.get_database("Magneto-Freelance")
 postulant_collection = db.get_collection("Postulant")
 company_collection = db.get_collection("Company")
+vacant_collection = db.get_collection("Vacants")
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
@@ -42,6 +43,17 @@ class Company(BaseModel):
     type: str = Field(...)
     nit: str = Field(...)
     cellphoneNumber: str = Field(...)
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+    )
+
+class Vacant(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    name: str = Field(...)
+    employer: str = Field(...)
+    description: str = Field(...)
+    salary: str = Field(...)
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
