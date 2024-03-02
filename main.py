@@ -42,6 +42,7 @@ class Company(BaseModel):
     ubication: str = Field(...)
     type: str = Field(...)
     nit: str = Field(...)
+    password: str = Field(...)
     cellphoneNumber: str = Field(...)
     model_config = ConfigDict(
         populate_by_name=True,
