@@ -13,7 +13,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
 db = client.get_database("Magneto-Freelance")
 postulant_collection = db.get_collection("Postulant")
 company_collection = db.get_collection("Company")
-vacant_collection = db.get_collection("Vacants")
+ofert_collection = db.get_collection("Oferts")
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
@@ -21,10 +21,10 @@ PyObjectId = Annotated[str, BeforeValidator(str)]
 class Postulant(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: str = Field(...)
+    username: str = Field(...)
     password: str = Field(...)
-    cellphoneNumber: str = Field(...)
     email: str = Field(...)
-    occupation: str = Field(...)
+
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
@@ -37,23 +37,20 @@ class PostulantCollection(BaseModel):
 class Company(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: str = Field(...)
+    username: str = Field(...)
     email: str = Field(...)
-    description: str = Field(...)
-    ubication: str = Field(...)
-    type: str = Field(...)
-    nit: str = Field(...)
     password: str = Field(...)
-    cellphoneNumber: str = Field(...)
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
     )
 
-class Vacant(BaseModel):
+class Ofert(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    name: str = Field(...)
+    title: str = Field(...)
     employer: str = Field(...)
     description: str = Field(...)
+    skills: str = Field(...)
     salary: str = Field(...)
     model_config = ConfigDict(
         populate_by_name=True,
@@ -131,3 +128,32 @@ async def create_company(company: Company = Body(...)):
 )
 async def get_company():
     return await company_collection.find().to_list(1000)
+
+
+
+@app.post(
+    "/oferts",
+    response_description="Add new Ofert",
+    response_model=Ofert,
+    status_code=status.HTTP_201_CREATED,
+    response_model_by_alias=False,
+)
+async def create_ofert(ofert: Ofert = Body(...)):
+    new_ofert = await ofert_collection.insert_one(
+        ofert.model_dump(by_alias=True, exclude=["id"])
+    )
+    created_ofert= await ofert_collection.find_one(
+        {"_id": new_ofert.inserted_id}
+    )
+    return created_ofert
+
+
+@app.get(
+    "/ofert",
+    response_description="Get oferts",
+    response_model=List[Ofert], 
+    status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,
+)
+async def get_oferts():
+    return await ofert_collection.find().to_list(1000)
