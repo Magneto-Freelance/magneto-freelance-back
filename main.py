@@ -1,3 +1,4 @@
+#python -m uvicorn main:app --reload
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 import os
@@ -22,6 +23,7 @@ postulant_collection = db.get_collection("Postulant")
 company_collection = db.get_collection("Company")
 offer_collection = db.get_collection("Offer")
 PyObjectId = Annotated[str, BeforeValidator(str)]
+portafolio_collection = db.get_collection("Portafolio")
 
 
 # clase usuarios
@@ -53,6 +55,15 @@ class Company(BaseModel):
         populate_by_name=True,
         arbitrary_types_allowed=True,
     )
+
+
+class Portafolio(BaseModel):
+    profesion: str
+    description: str
+    salary: str
+    skills: str
+    whatsapp: str
+    other: str
 
 
 class LoginType(str, Enum):
@@ -234,3 +245,31 @@ async def login_for_access_token(form_data: LoginData):
 @app.post("/login", response_model=dict, status_code=status.HTTP_200_OK)
 async def login(form_data: LoginData):
     return await login_for_access_token(form_data)
+
+
+@app.post(
+    "/portafolio",
+    response_description="Add new portafolio",
+    response_model=Portafolio,
+    status_code=status.HTTP_201_CREATED,
+    response_model_by_alias=False,
+)
+async def create_portafolio(portafolio: Portafolio = Body(...)):
+    new_portafolio = await portafolio_collection.insert_one(
+        portafolio.model_dump(by_alias=True, exclude=["id"])
+    )
+    created_portafolio = await portafolio_collection.find_one(
+        {"_id": new_portafolio.inserted_id}
+    )
+    return created_portafolio
+
+
+@app.get(
+    "/portafolio",
+    response_description="Get portafolio",
+    response_model=List[Portafolio],
+    status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,
+)
+async def get_portafolio():
+    return await portafolio_collection.find().to_list(1000)
